@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-ink-900 text-ink-100 font-sans;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.15) 0%, transparent 60%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-ink-800; }
+  ::-webkit-scrollbar-thumb { @apply bg-ink-500 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-ink-400; }
+
+  ::selection { @apply bg-accent/30 text-white; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
+           transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50 
+           disabled:opacity-50 disabled:cursor-not-allowed select-none;
+  }
+  .btn-primary {
+    @apply btn bg-accent hover:bg-accent-dark text-white shadow-lg shadow-accent/20 
+           hover:shadow-accent/30 active:scale-95;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-ink-700 text-ink-200 hover:text-white 
+           border border-ink-600 hover:border-ink-500 active:scale-95;
+  }
+  .btn-danger {
+    @apply btn bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20 
+           hover:border-danger/40 active:scale-95;
+  }
+  .input {
+    @apply w-full px-4 py-2.5 bg-ink-800 border border-ink-600 rounded-lg text-ink-100 
+           placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-accent/50 
+           focus:border-accent/50 transition-all duration-200 text-sm;
+  }
+  .card {
+    @apply bg-ink-800/60 backdrop-blur-sm border border-ink-700/50 rounded-xl;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* ── TipTap Editor Styles ────────────────────────────────────── */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 100%;
+  padding: 2rem 3rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #e0e0eb;
+  caret-color: #818cf8;
+}
+
+.tiptap-editor .ProseMirror > * + * { margin-top: 0.75em; }
+
+.tiptap-editor .ProseMirror h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 0.5em;
+}
+.tiptap-editor .ProseMirror h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e0e0eb;
+  line-height: 1.3;
+}
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #c2c2d6;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #4a4a78;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.tiptap-editor .ProseMirror a {
+  color: #818cf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tiptap-editor .ProseMirror code {
+  background: #171730;
+  border: 1px solid #252548;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  color: #a5b4fc;
+}
+
+.tiptap-editor .ProseMirror pre {
+  background: #0d0d1e;
+  border: 1px solid #252548;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: #c2c2d6;
+}
+
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 3px solid #6366f1;
+  padding-left: 1rem;
+  color: #9494b8;
+  font-style: italic;
+}
+
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol {
+  padding-left: 1.5rem;
+}
+.tiptap-editor .ProseMirror ul li { list-style: disc; }
+.tiptap-editor .ProseMirror ol li { list-style: decimal; }
+.tiptap-editor .ProseMirror li > p { margin: 0; }
+
+.tiptap-editor .ProseMirror hr {
+  border: none;
+  border-top: 1px solid #252548;
+  margin: 2rem 0;
+}
+
+/* Task list */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] { padding-left: 0; }
+.tiptap-editor .ProseMirror li[data-type="taskItem"] {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  list-style: none;
+}
+.tiptap-editor .ProseMirror li[data-type="taskItem"] input[type="checkbox"] {
+  margin-top: 4px;
+  accent-color: #6366f1;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Highlighted text */
+.tiptap-editor .ProseMirror mark {
+  background: rgba(99,102,241,0.25);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Focus mode */
+.editor-focused .ProseMirror { caret-color: #818cf8; }
+
+/* Collaboration cursor */
+.collaboration-cursor__caret {
+  border-left: 2px solid;
+  border-right: none;
+  margin-left: -1px;
+  pointer-events: none;
+  word-break: normal;
+}
+.collaboration-cursor__label {
+  border-radius: 3px 3px 3px 0;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  left: -1px;
+  line-height: normal;
+  padding: 2px 6px;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Page background for editor */
+.editor-page {
+  background: #12121f;
+  min-height: calc(100vh - 120px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .tiptap-editor .ProseMirror { padding: 1rem 1.25rem; }
+}
+
+/* ── Editor Full Height Fix ─────────────────────────────────── */
+.editor-page {
+  cursor: text;
+}
+
+/* Make the entire white page area clickable and full height */
+.tiptap-editor {
+  min-height: calc(100vh - 160px);
+  cursor: text;
+  display: flex;
+  flex-direction: column;
+}
+
+.tiptap-editor .ProseMirror {
+  flex: 1;
+  min-height: calc(100vh - 180px) !important;
+  cursor: text;
+  padding: 3rem 4rem !important;
+}
+
+/* Click anywhere on the page area to focus */
+.editor-page > .tiptap-editor {
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .tiptap-editor .ProseMirror {
+    padding: 1.5rem !important;
+    min-height: calc(100vh - 200px) !important;
+  }
+}
