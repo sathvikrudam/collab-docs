@@ -45,10 +45,10 @@ export default function App() {
 
   // Wake Render backend when frontend loads
   useEffect(() => {
-    fetch("https://collab-docs-server-2szd.onrender.com/api/health")
-      .then(() => console.log("Backend awakened"))
-      .catch(() => console.log("Backend sleeping"));
-  }, []);
+  fetch(`${import.meta.env.VITE_API_URL}/api/health`)
+    .then(() => console.log("Backend awakened"))
+    .catch(() => console.log("Backend sleeping"));
+}, []);
 
   return (
     <AuthProvider>
