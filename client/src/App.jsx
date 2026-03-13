@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -41,6 +42,14 @@ function AppRoutes() {
 }
 
 export default function App() {
+
+  // Wake Render backend when frontend loads
+  useEffect(() => {
+    fetch("https://collab-docs-server-2szd.onrender.com/api/health")
+      .then(() => console.log("Backend awakened"))
+      .catch(() => console.log("Backend sleeping"));
+  }, []);
+
   return (
     <AuthProvider>
       <SocketProvider>
