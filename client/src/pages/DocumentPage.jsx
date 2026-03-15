@@ -22,10 +22,11 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const SAVE_INTERVAL = 30000; // 30s periodic save
+const SAVE_INTERVAL = 30000;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 export default function DocumentPage() {
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -33,7 +34,7 @@ export default function DocumentPage() {
   const [doc, setDoc] = useState(null);
   const [permission, setPermission] = useState('view');
   const [loading, setLoading] = useState(true);
-  const [saveStatus, setSaveStatus] = useState('saved'); // saved | saving | unsaved
+  const [saveStatus, setSaveStatus] = useState('saved');
   const [activeUsers, setActiveUsers] = useState([]);
   const [showShare, setShowShare] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -46,7 +47,29 @@ export default function DocumentPage() {
 
   const canEdit = permission === 'owner' || permission === 'edit';
 
-  // ─── TipTap Editor ─────────────────────────────────────────────
+  // ⭐ DOWNLOAD FUNCTIONS ADDED
+  const downloadDOC = () => {
+    const content = document.querySelector(".tiptap-editor")?.innerText || "";
+
+    const blob = new Blob([content], { type: "application/msword" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${doc?.title || "document"}.doc`;
+    link.click();
+  };
+
+  const downloadPDF = () => {
+    const content = document.querySelector(".tiptap-editor")?.innerText || "";
+
+    const blob = new Blob([content], { type: "application/pdf" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${doc?.title || "document"}.pdf`;
+    link.click();
+  };
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
@@ -64,7 +87,6 @@ export default function DocumentPage() {
       if (isRemoteChange.current) return;
       setSaveStatus('unsaved');
       const content = editor.getJSON();
-      // Broadcast changes
       if (socketRef.current?.connected) {
         socketRef.current.emit('send-changes', { documentId: id, delta: content });
       }
@@ -75,7 +97,6 @@ export default function DocumentPage() {
     },
   });
 
-  // ─── Load Document ─────────────────────────────────────────────
   useEffect(() => {
     const loadDoc = async () => {
       try {
@@ -93,8 +114,8 @@ export default function DocumentPage() {
     loadDoc();
   }, [id]);
 
-  // ─── Socket Setup ──────────────────────────────────────────────
   useEffect(() => {
+
     if (!id) return;
 
     socketRef.current = io(SOCKET_URL, {
@@ -155,15 +176,14 @@ export default function DocumentPage() {
       socket.disconnect();
       clearTimeout(saveTimerRef.current);
     };
+
   }, [id, token, editor]);
 
-  // ─── Edit permission ───────────────────────────────────────────
   useEffect(() => {
     if (editor && canEdit) editor.setEditable(true);
     else if (editor) editor.setEditable(false);
   }, [editor, canEdit]);
 
-  // ─── Auto save ─────────────────────────────────────────────────
   const scheduleAutoSave = useCallback((content) => {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => saveContent(content), 5000);
@@ -181,7 +201,6 @@ export default function DocumentPage() {
     }
   }, [id, canEdit, editor]);
 
-  // Periodic save
   useEffect(() => {
     const interval = setInterval(() => {
       if (saveStatus === 'unsaved') saveContent();
@@ -189,14 +208,12 @@ export default function DocumentPage() {
     return () => clearInterval(interval);
   }, [saveStatus, saveContent]);
 
-  // ─── Title change ──────────────────────────────────────────────
   const handleTitleChange = (e) => {
     const title = e.target.value;
     setDoc((prev) => ({ ...prev, title }));
     socketRef.current?.emit('title-change', { documentId: id, title });
   };
 
-  // ─── Manual save ───────────────────────────────────────────────
   const handleManualSave = async () => {
     await saveContent();
     toast.success('Saved!');
@@ -212,14 +229,15 @@ export default function DocumentPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-ink-900">
-      {/* Top bar */}
+
       <header className="sticky top-0 z-30 bg-ink-900/90 backdrop-blur border-b border-ink-800/60">
+
         <div className="flex items-center gap-3 px-4 py-2">
+
           <button onClick={() => navigate('/dashboard')} className="p-1.5 text-ink-400 hover:text-white transition-colors rounded-lg hover:bg-ink-800">
             <ArrowLeft size={16} />
           </button>
 
-          {/* Title */}
           <input
             className="flex-1 bg-transparent border-none outline-none text-white font-medium text-sm placeholder:text-ink-500 min-w-0"
             value={doc?.title || ''}
@@ -230,23 +248,34 @@ export default function DocumentPage() {
           />
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Save status */}
+
             <span className={`flex items-center gap-1.5 text-xs ${
               saveStatus === 'saved' ? 'text-success' :
               saveStatus === 'saving' ? 'text-ink-400' : 'text-warning'
             }`}>
+
               {saveStatus === 'saving' && <Loader2 size={11} className="animate-spin" />}
               {saveStatus === 'saved' && <Cloud size={11} />}
               {saveStatus === 'unsaved' && <CloudOff size={11} />}
+
               <span className="hidden sm:inline">
                 {saveStatus === 'saved' ? 'Saved' : saveStatus === 'saving' ? 'Saving…' : 'Unsaved'}
               </span>
+
             </span>
 
-            {/* Connection */}
-            <span className={`w-2 h-2 rounded-full ${connected ? 'bg-success' : 'bg-danger'}`} title={connected ? 'Connected' : 'Disconnected'} />
+            <span className={`w-2 h-2 rounded-full ${connected ? 'bg-success' : 'bg-danger'}`} />
 
             <ActiveUsers users={activeUsers} />
+
+            {/* ⭐ DOWNLOAD BUTTONS ADDED */}
+            <button onClick={downloadPDF} className="btn-ghost px-3 py-1.5 text-xs hidden sm:flex">
+              Download PDF
+            </button>
+
+            <button onClick={downloadDOC} className="btn-ghost px-3 py-1.5 text-xs hidden sm:flex">
+              Download DOC
+            </button>
 
             {canEdit && (
               <button onClick={handleManualSave} className="btn-ghost px-3 py-1.5 text-xs hidden sm:flex">
@@ -264,16 +293,17 @@ export default function DocumentPage() {
                 <Share2 size={13} /> Share
               </button>
             )}
+
           </div>
+
         </div>
 
-        {/* Toolbar */}
         {canEdit && editor && <EditorToolbar editor={editor} />}
+
       </header>
 
-
-      {/* Editor */}
       <main className="flex-1 flex flex-col items-center py-6 px-4" onClick={() => editor?.commands.focus()}>
+
         <div className="editor-page w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl" style={{minHeight: "calc(100vh - 130px)"}}>
           <EditorContent editor={editor} />
         </div>
@@ -283,12 +313,13 @@ export default function DocumentPage() {
             <span>👁</span> View only — you don't have edit access
           </div>
         )}
+
       </main>
 
-      {/* Modals */}
       {showShare && (
         <ShareDialog docId={id} doc={doc} onClose={() => setShowShare(false)} />
       )}
+
       {showHistory && (
         <VersionHistory
           docId={id}
@@ -302,6 +333,7 @@ export default function DocumentPage() {
           }}
         />
       )}
+
     </div>
   );
 }
