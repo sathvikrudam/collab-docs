@@ -60,15 +60,35 @@ export default function DocumentPage() {
   };
 
   const downloadPDF = () => {
-    const content = document.querySelector(".tiptap-editor")?.innerText || "";
+  const content = document.querySelector(".tiptap-editor")?.innerHTML || "";
 
-    const blob = new Blob([content], { type: "application/pdf" });
+  const printWindow = window.open("", "", "width=800,height=600");
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${doc?.title || "document"}.pdf`;
-    link.click();
-  };
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>${doc?.title || "Document"}</title>
+        <style>
+          body{
+            font-family: Arial, sans-serif;
+            padding:40px;
+            line-height:1.6;
+          }
+          h1,h2,h3{
+            margin-top:20px;
+          }
+        </style>
+      </head>
+      <body>
+        ${content}
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+};
 
   const editor = useEditor({
     extensions: [
