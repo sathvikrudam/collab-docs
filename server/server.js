@@ -20,10 +20,26 @@ connectDB();
 const app = express();
 const httpServer = http.createServer(app);
 
-// ─── Socket.io Setup ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Allowed Origins
+// ─────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+];
+
+// ─────────────────────────────────────────────────────────────
+// Socket.io Setup
+// ─────────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by Socket.IO CORS'));
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -33,12 +49,20 @@ const io = new Server(httpServer, {
 // Initialize socket handlers
 initSocket(io);
 
-// ─── Middleware ───────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Middleware
+// ─────────────────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
@@ -50,7 +74,9 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// ─── Rate Limiting ────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Rate Limiting
+// ─────────────────────────────────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -72,7 +98,9 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// ─── Routes ───────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Routes
+// ─────────────────────────────────────────────────────────────
 
 // Root Route
 app.get('/', (req, res) => {
@@ -93,17 +121,23 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 
-// ─── 404 Handler ──────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// 404 Handler
+// ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     message: `Route ${req.originalUrl} not found`,
   });
 });
 
-// ─── Error Handler ────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Error Handler
+// ─────────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── Start Server ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Start Server
+// ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
 httpServer.listen(PORT, () => {
